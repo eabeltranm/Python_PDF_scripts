@@ -7,8 +7,36 @@ import pdfplumber
 import pandas as pd
 import os
 import re
+from regex_patterns import (
+    get_active_patterns, 
+    enable_pattern, 
+    disable_pattern, 
+    disable_all_patterns,
+    get_pattern_status
+)
 
 def Process_Registros_INVIMA(folder_path):
+    # Configure patterns before processing
+    print("Current pattern status:")
+    get_pattern_status()
+    
+    # Allow user to configure patterns
+    print("\nDisabling all patterns by default...")
+    disable_all_patterns()
+    
+    print("\nEnter pattern names to enable (separated by commas), or 'all' for all patterns:")
+    pattern_input = input().strip()
+    
+    if pattern_input.lower() == 'all':
+        enable_all_patterns()
+    else:
+        patterns_to_enable = [p.strip() for p in pattern_input.split(',')]
+        for pattern_name in patterns_to_enable:
+            enable_pattern(pattern_name)
+    
+    print("\nProcessing with enabled patterns:")
+    get_pattern_status()
+
     all_data = []
 
     # Iterate through each file in the folder
@@ -87,7 +115,7 @@ def Process_Registros_INVIMA(folder_path):
 # Example usage
 folder_path = input("Please enter the folder path: ")
 df = Process_Registros_INVIMA(folder_path)
-print(df)
+
 
 def transform_df(df):
     """
@@ -117,7 +145,6 @@ def transform_df(df):
     transformed_df = pd.DataFrame(transformed_data)
     return transformed_df
 transformed_df = transform_df(df)
-print(transformed_df)
 
 for i in transformed_df['Observaciones']:
     text = i.strip()
@@ -126,35 +153,17 @@ for i in transformed_df['Observaciones']:
     print(len(text))
 
 text = i
-patterns = [
-             # r"OTT[\w\s,-]*?CM",
-             # r"OTF[\w\s,-]*?CM",
-             # r"OTS[\w\s,-]*?CM",
-             # r"OTL[\w\s,-]*?APLICADOR",
-             # r"OTP-?\s*[\w\s,-]*?GR",
-             # r"OT-[\w\s,(\w\s)-]*?CM",
-             # # r"[\w/]+",
-             # r"TS[\w\s,(\w\s)\s-]*?MM\)",
-             # r"TS[\w\s,-]*?MM", 
-             # r"TSF[\w\s,(\w\s)\s-]*?MM\)",
-             # r"TSP[\w\s,(\w\s)\s-]*?GR\)",
-             # "WM[\w\s-]*?\d*MM",
-             # r"(WM[\w]*-\d{3}[\w\s]*[\w\s\d-]+?)(?=\s*WM[\w]*-\d{3}|$)",
-             r"(WM\w*-*\d*\s*[\w\s\d-]+?)(?=\s*WM\w*-*\d*|$)"
-          ]
+patterns = list(get_active_patterns().values())
 referencias = []
 for pattern in patterns:
     matches = re.findall(pattern, text)
     for match in matches:
-        # match.replace("\n", "")
         referencias.append(match)
-print(referencias)
 
 cleaned_list = []
 for r in referencias:
     cleaned_string = r.replace('\n', '')
     cleaned_list.append(cleaned_string)
-print(cleaned_list)
 
 # Extend the DataFrame by repeating the first row
 extended_df = pd.concat([transformed_df] * len(referencias), ignore_index=True)
@@ -185,7 +194,7 @@ gc = gspread.service_account(filename="C:\\Users\\eabeltranm\\Documents\\Code\\P
 # Open the Google Sheet
 sh = gc.open('Nuevo_Projecto')
 # Name of the new sheet
-new_sheet_name = 'exmaple_sheet'
+new_sheet_name = 'exmaple_sheet_1'
 # Create a new sheet
 worksheet = sh.add_worksheet(title=new_sheet_name, rows="200", cols="50")
 # Create a sample DataFrame
