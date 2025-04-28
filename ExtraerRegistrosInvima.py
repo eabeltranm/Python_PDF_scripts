@@ -1,3 +1,14 @@
+'''Uses pdfplumber to extract tables from PDF documents
+Processes 4 different types of tables from each PDF:
+Table 1: Basic product data (Datos_producto)
+Table 2: Interest data (Datos_de_interés)
+Table 3: Commercial presentations (Presentaciones_comerciales)
+Table 4: Product roles (Roles_por_producto)
+Uses regex patterns (imported from regex_patterns.py) to extract references
+Transforms the data into a structured DataFrame
+Creates a detailed description string combining various fields
+Exports the results to Google Sheets'''
+
 import gspread
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -28,7 +39,10 @@ def Process_Registros_INVIMA(folder_path):
     pattern_input = input().strip()
     
     if pattern_input.lower() == 'all':
-        enable_all_patterns()
+        # Enable all available patterns
+        patterns = get_active_patterns()
+        for pattern_name in patterns:
+            enable_pattern(pattern_name)
     else:
         patterns_to_enable = [p.strip() for p in pattern_input.split(',')]
         for pattern_name in patterns_to_enable:
@@ -193,10 +207,9 @@ extended_df['Descripcion'] = extended_df['Descripcion'].apply(lambda x: x.strip(
 gc = gspread.service_account(filename="C:\\Users\\eabeltranm\\Documents\\Code\\Python_PDF_scripts\\gen-lang-client-0469262768-6cc744827056.json")
 # Open the Google Sheet
 sh = gc.open('Nuevo_Projecto')
-# Name of the new sheet
-new_sheet_name = 'exmaple_sheet_1'
+# Get worksheet name from user
+worksheet_name = input("Please enter the name for the new worksheet: ")
 # Create a new sheet
-worksheet = sh.add_worksheet(title=new_sheet_name, rows="200", cols="50")
-# Create a sample DataFrame
+worksheet = sh.add_worksheet(title=worksheet_name, rows="200", cols="50")
 # Write the DataFrame to the Google Sheet
 set_with_dataframe(worksheet, extended_df)
