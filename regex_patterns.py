@@ -12,7 +12,8 @@ REFERENCE_PATTERNS = {
     'tsp_pattern': {'pattern': r"TSP[\w\s,(\w\s)\s-]*?GR\)", 'enabled': True},
     'wm_mm': {'pattern': r"WM[\w\s-]*?\d*MM", 'enabled': True},
     'wm_complex_1': {'pattern': r"(WM[\w]*-\d{3}[\w\s]*[\w\s\d-]+?)(?=\s*WM[\w]*-\d{3}|$)", 'enabled': True},
-    'wm_complex_2': {'pattern': r"(WM\w*-*\d*\s*[\w\s\d-]+?)(?=\s*WM\w*-*\d*|$)", 'enabled': True}
+    'wm_complex_2': {'pattern': r"(WM\w*-*\d*\s*[\w\s\d-]+?)(?=\s*WM\w*-*\d*|$)", 'enabled': True},
+    'fq_pattern': {'pattern': r"F[A-Z]\d+[A-Z]+", 'enabled': True}
 }
 
 def enable_pattern(pattern_name):
